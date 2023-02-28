@@ -67,7 +67,7 @@ function buildAccount() {
             }
 
             fs.writeFileSync(`accounts/${accountName}.json`,
-                `{"name": "${accountName}"}`,
+                `{"name": "${accountName}", "valeu": "0"}`,
                 (err) => {
                     console.log(err);
                 });
