@@ -29,6 +29,7 @@ function operation() {
             } else if (action === 'Consultar Saldo') {
 
             } else if (action === 'Depositar') {
+                deposit();
 
             } else if (action === 'Sacar') {
 
@@ -67,7 +68,7 @@ function buildAccount() {
             }
 
             fs.writeFileSync(`accounts/${accountName}.json`,
-                `{"name": "${accountName}", "valeu": "0"}`,
+                `{"name": "${accountName}"}`,
                 (err) => {
                     console.log(err);
                 });
@@ -75,4 +76,32 @@ function buildAccount() {
             operation();
         })
         .catch((err) => console.log(err));
+}
+
+// function add an amount to user
+
+function deposit() {
+    inquirer.prompt([{
+            name: 'accountName',
+            message: 'Qual o nome da sua conta?'
+        }])
+        .then((answer) => {
+            const accountName = answer['accountName'];
+
+            if (!checkAccount(accountName)) {
+                return deposit();
+            } else {
+
+            }
+
+        }).catch((err) => console.log(err));
+}
+
+function checkAccount(accountName) {
+    if (!fs.existsSync(`accounts/${accountName}.json`)) {
+        console.log('Essa conta não existe!');
+        return false;
+    } else
+        return true;
+
 }
