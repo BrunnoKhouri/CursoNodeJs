@@ -27,12 +27,13 @@ function operation() {
             if (action === 'Criar Conta') {
                 createAccount();
             } else if (action === 'Consultar Saldo') {
+                getAccountBalance();
 
             } else if (action === 'Depositar') {
                 deposit();
 
             } else if (action === 'Sacar') {
-
+                toWtithDraw();
             } else if (action === 'Sair') {
                 console.log(chalk.bgWhite.black('Adios amigo'));
                 process.exit();
@@ -144,7 +145,7 @@ function addAmount(accountName, amount) {
     }
     accountData.balance = parseFloat(amount) + parseFloat((accountData.balance));
     console.log(accountData);
-    
+
     fs.writeFileSync(
         `accounts/${accountName}.json`,
         JSON.stringify(accountData),
@@ -162,4 +163,80 @@ function getAccount(accountName) {
     });
 
     return JSON.parse(accountJSON);
+}
+
+function getAccountBalance() {
+    inquirer.prompt([{
+            name: 'accountName',
+            message: 'Qual o nome da sua conta.'
+        }])
+        .then((answer) => {
+            const accountName = answer["accountName"];
+
+            //Verify if account exists
+            if (!checkAccount(accountName)) {
+                return getAccountBalance();
+            }
+
+            const accountData = getAccount(accountName);
+
+            console.log(chalk.bgBlue.black(
+                `Olá, o saldo da sua conta é de R$ ${accountData.balance}`
+            ))
+
+        })
+        .catch(err => console.log(err));
+}
+
+function toWtithDraw() {
+    inquirer.prompt([{
+            name: "accountName",
+            message: 'Qual o nome da sua conta.'
+        }])
+        .then((answer) => {
+            const accountName = answer['accountName'];
+            if (!checkAccount(accountName)) {
+                return toWtithDraw();
+            }
+
+            inquirer.prompt([{
+                    name: "amount",
+                    message: "Quanto você deseja sacar ?"
+                }])
+                .then((answer) => {
+                    const amount = answer["amount"];
+                    removeAmount(accountName, amount);
+                })
+                .catch(err => console.log(err));
+        }).catch(err => console.log(err));
+}
+
+function removeAmount(accountName, amount) {
+
+    const accountData = getAccount(accountName);
+
+    if (!amount) {
+        return toWtithDraw();
+    }
+
+    if (amount > accountData.balance) {
+        console.log('Valor indisponivel');
+        return toWtithDraw();
+    }
+
+    if (accountData.balance === 0) {
+        console.log("Sua conta não tem dinheiro amigo kkk");
+        return toWtithDraw();
+    }
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount);
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`,
+        JSON.stringify(accountData),
+        function (err) {
+            console.log(err);
+        }
+    )
+
+    console.log(`Saque de ${amount} realizado com sucesso!`);
 }
